@@ -17,3 +17,23 @@
         </div>
     </div>
 </template>
+
+<style>
+    .main > * {
+        margin: 0 58px;
+    }
+    
+    .board-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 40px;
+        margin-top: 40px;
+    }
+
+    .board-container > .board {
+        min-width: 250px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+</style>

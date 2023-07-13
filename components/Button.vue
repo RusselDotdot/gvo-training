@@ -15,3 +15,21 @@
         {{ value }}
     </button>
 </template>
+
+<style>
+    .btn-modal {
+        border: none;
+        color: #02836B;
+        font-size: 12px;
+        background: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-modal::before {
+        content: url(../assets/images/add-sign.png);
+        margin-right: 4px;
+
+    }
+</style>
