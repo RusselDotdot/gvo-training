@@ -4,11 +4,6 @@ export default defineNuxtConfig({
   typescript: {
     strict: true
   },
-  modules: [
-    '@ant-design-vue/nuxt'
-  ],
-  antd:{
-    // Options
-  },
+  plugins:['@/plugins/antd'],
   css: ["~/assets/styles/index.scss"],
 })
