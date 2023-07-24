@@ -1,52 +1,55 @@
 
 <template>
-    <button
-        class="btn-modal"
-        @click.prevent="showModal"
+    <div>
+        <button
+            class="btn-modal"
+            @click.prevent="showModal"
+            >
+                {{ value }}
+        </button>
+        <a-modal
+            v-model:visible="visible"
+            title="タスクの追加" 
+            cancelText="キャンセル"
+            okText="追加"
+            centered
+            v-if="visible"
         >
-            {{ value }}
-    </button>
-    <a-modal
-        v-model:visible="visible"
-        title="タスクの追加" 
-        cancelText="キャンセル"
-        okText="追加"
-        centered
-    >
-    <form class="form" ref="form">
-        <input type="text" placeholder="タスクを入力..." class="task-title" v-model="titleName" autocomplete="off"><br />
-        <div class="display-tag-btn">
-            <span>タグ</span>
-            <input type="checkbox" id="tagShow">
-            <label class="add" for="tagShow" @click="toggleTagListShow"></label>
-        </div>
-
-        <div class="selectedTagList">
-            <Tag v-for="tag in selectedTags" :title="tag.title" />
-        </div>
-
-        <div class="container" v-show="tagListShow">
-            <div class="tags-container">
-                <h3 class="label">タグ一覧</h3>
-                <div v-for="tag in tags" class="tag-item">
-                    <input type="checkbox" :id="tag.title" class="tag-choices" :value="tag.title"><label :for="tag.title" @click="selected">{{ tag.title }}</label>
+            <form class="form" ref="form">
+                <input type="text" placeholder="タスクを入力..." class="task-title" v-model="titleName" autocomplete="off"><br />
+                <div class="display-tag-btn">
+                    <span>タグ</span>
+                    <input type="checkbox" id="tagShow" :checked="tagListShow">
+                    <label class="add" @click="toggleTagListShow"></label>
                 </div>
-            </div>
-            <div class="tag-create-container">
-                <form @submit.prevent="createTag">
-                    <input type="text" placeholder="新しいタグを入力" v-model="tagName" name="tagTitle" autocomplete="off">
-                    <input type="submit" value="作成" :disabled="isDisabledTag">
-                </form>
-            </div>
-        </div>
 
-        <div class="footer">
-            <button class="ant-btn" type="button" ant-click-animating-without-extra-node="false" @click="closeModal"><!----><span>キャンセル</span></button>
-            <button class="ant-btn ant-btn-primary" type="button" @click="createTask" :disabled="isDisabledTask"><!----><span>追 加</span></button>
-        </div>
+                <div class="selectedTagList">
+                    <Tag v-for="tag in selectedTags" :title="tag.title" :key="`selectedTags-${tag.title}`"/>
+                </div>
 
-    </form>
-    </a-modal>
+                <div class="container" v-show="tagListShow">
+                    <div class="tags-container">
+                        <h3 class="label">タグ一覧</h3>
+                        <div v-for="tag in tags" class="tag-item" :key="`tags-${tag.title}`">
+                            <input type="checkbox" :id="`tag-${tag.title}`" class="tag-choices" :value="tag.title"><label :for="`tag-${tag.title}`" @click="selected">{{ tag.title }}</label>
+                        </div>
+                    </div>
+                    <div class="tag-create-container">
+                        <form @submit.prevent="createTag">
+                            <input type="text" placeholder="新しいタグを入力" v-model="tagName" name="tagTitle" autocomplete="off">
+                            <input type="submit" value="作成" :disabled="isDisabledTag">
+                        </form>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <button class="ant-btn" type="button" ant-click-animating-without-extra-node="false" @click="closeModal"><!----><span>キャンセル</span></button>
+                    <button class="ant-btn ant-btn-primary" type="button" @click="createTask" :disabled="isDisabledTask"><!----><span>追 加</span></button>
+                </div>
+
+            </form>
+        </a-modal>
+    </div>
 </template>
 
 <script>
@@ -129,9 +132,24 @@
                     this.selectedTags = []
                     this.tagListShow = false
                     this.titleName = ''
-                    document.querySelectorAll('.tag-choices').forEach(item => {item.checked = false;})
+                    if(newValue == false) {
+                        document.querySelectorAll('.tag-choices').forEach(item => {item.checked = false;})
+                    }
                 }
             },
+            tagListShow: {
+                handler(newValue) {
+                    if(newValue == true) {
+                        this.selectedTags.forEach(item => {
+                            document.querySelectorAll('.tag-choices').forEach(element => {
+                                if(element.value == item.title) {
+                                    element.checked = true
+                                }
+                            })
+                        })
+                    }
+                }
+            }
         },
 
         mounted() {
@@ -152,7 +170,6 @@
                     if(trueCount > 0) {
                         return true
                     }
-                    console.log(this.tagName)
                     return false
                 }
             },
@@ -172,7 +189,7 @@
                         return false
                     }
                 }
-            }
+            },
         },
     })
 </script>

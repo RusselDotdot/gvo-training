@@ -1,11 +1,11 @@
 <template>
-    <div class="board" @drop="onDrop($event, position)" @dragenter.prevent @dragover.prevent>
+    <div class="board" @drop="onBoardDrop($event, position)" @dragenter.prevent @dragover.prevent>
         <h3 class="title">{{ title }} <span class="task-count">{{ newTasks.length }}</span></h3>
         <div class="card-group">
             <slot name="modal"></slot>
 
             <div class="task-list">
-                <Task v-for="task in newTasks" :title="task.title" :tags="task.tags" draggable="true" @dragstart="startDrag($event, task.title)"/>
+                <Task v-for="task in newTasks" :title="task.title" :tags="task.tags" :draggable="isDraggable" @dragstart="startDrag($event, task.title)" :key="`newTasks-${task.title}`" @drop="onTaskDrop($event, `${position}-${task.title}`)"/>
             </div>
         </div>
     </div>
@@ -17,15 +17,8 @@
         props: {
             title: String,
             tasks: Object,
-            position: Number
-        },
-
-        data() {
-            // const newTasks = ref([])
-            return {
-                // newTasks
-            }
-            
+            position: Number,
+            filterLength: Number
         },
 
         computed: {
@@ -34,31 +27,61 @@
                     return task.position == this.position
                 })
                 return newTasks
-            }
-        },
+            },
 
-        mounted() {
-            // this.newTasks
+            isDraggable() {
+                if(this.filterLength > 0) {
+                    return false
+                }
+                return true
+            }
         },
 
         methods: {
             startDrag(event, taskTitle) {
-                // console.log(taskTitle)
                 event.dataTransfer.dropEffect = 'move'
                 event.dataTransfer.effectAllowed = 'move'
                 event.dataTransfer.setData('taskTitle', taskTitle)
             },
 
-            onDrop(event, dropPos) {
+            onTaskDrop(event, pos_title) {
+                event.stopPropagation();
+                const taskTitle = event.dataTransfer.getData('taskTitle')
+                this.tasks.forEach((task, index) => {
+                    if(task.title == taskTitle) {
+                        this.tasks[index].position = pos_title.split("-")[0]
+
+                        const dropTask = this.tasks.filter(task => {
+                            return task.title == pos_title.split("-")[1]
+                        })
+                        const dropTaskIndex = this.tasks.indexOf(dropTask[0])
+                        const extractedDraggedTask = this.tasks.filter(task => {
+                            return task.title != taskTitle
+                        })
+                        const reOrderTasks = [
+                            ...extractedDraggedTask.slice(0, dropTaskIndex),
+                            this.tasks[index],
+                            ...extractedDraggedTask.slice(dropTaskIndex)
+                        ]
+
+                        // console.log(reOrderTasks)
+                        this.$emit('reorder-tasks', reOrderTasks)
+                    }
+                })
+                
+            },
+            
+            onBoardDrop(event, dropPos) {
                 const taskTitle = event.dataTransfer.getData('taskTitle')
                 this.tasks.forEach((task, index) => {
                     if(task.title == taskTitle) {
                         this.tasks[index].position = dropPos
+                        this.tasks.push(this.tasks.splice(index, 1)[0])
                     }
                 })
-
-            }
-        }
+            },
+        },
+        emits: ['reorder-tasks'],
 
     })
 </script>

@@ -4,11 +4,11 @@
         <div class="filter-bar" @click="toggleShow"></div>
         <div v-show="filterShow" class="filter-container">
             <div class="filter-content">
-                <input type="text" class="filter-search" placeholder="タグを検索..." v-model="searchVal">
+                <input type="text" class="filter-search" placeholder="タグを検索..." v-model="searchVal" @input="inputSearch">
                 <button class="unselect-all" @click="unselectAll">未選択</button>
                 <div class="filter-list">
-                    <div v-for="tag in filteredTags" class="tag-item">
-                        <input type="checkbox" :id="tag.title" class="filter-choices" :value="tag.title"><label :for="tag.title" @click="selected">{{ tag.title }}</label>
+                    <div v-for="tag in filteredTags" class="tag-item" :key="`filteredTags-${tag.title}`">
+                        <input type="checkbox" :id="`filter-${tag.title}`" class="filter-choices" :value="tag.title"><label :for="`filter-${tag.title}`" @click="selected">{{ tag.title }}</label>
                     </div>
                 </div>
             </div>
@@ -36,6 +36,15 @@
         },
 
         methods: {
+            inputSearch() {
+                this.selectedFilter.forEach(item => {
+                    document.querySelectorAll('.filter-choices').forEach(element => {
+                        if(element.value == item.title) {
+                            element.checked = true
+                        }
+                    })
+                })
+            },
             toggleShow() {
                 this.filterShow = !this.filterShow
                 this.selectedFilter.forEach(item => {
@@ -151,9 +160,16 @@
     }
 
     .unselect-all {
-        margin: 12px 0 5px 6px;
+        margin: 12px 0 6px 0;
         border: none;
         background: none;
+        padding: 5px;
+        border-radius: 3px;
+    }
+
+    .unselect-all:hover {
+        color: #FFFFFF;
+        background: #000000;
     }
 
     .filter-content {
