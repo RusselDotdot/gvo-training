@@ -2,24 +2,24 @@
     <div class="main">
         <Filter :tags="tags" @filter-tasks="filterTasks"/>
         <div class="board-container">
-            <Boards title="未対応" :tasks="filteredTask.length == 0 ? tasks : filteredTask" :position="1">
+            <Boards title="未対応" :tasks="taskProp" :position="positions[0]" :filterLength="filterLength" @reorder-tasks="reOrderTask">
                 <template v-slot:modal>
-                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="1" :tasks="tasks"/>
+                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="positions[0]" :tasks="tasks"/>
                 </template>
             </Boards>
-            <Boards title="処理中" :tasks="filteredTask.length == 0 ? tasks : filteredTask" :position="2">
+            <Boards title="処理中" :tasks="taskProp" :position="positions[1]" :filterLength="filterLength" @reorder-tasks="reOrderTask">
                 <template v-slot:modal>
-                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="2" :tasks="tasks"/>
+                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="positions[1]" :tasks="tasks"/>
                 </template>
             </Boards>
-            <Boards title="レビュー中" :tasks="filteredTask.length == 0 ? tasks : filteredTask"  :position="3">
+            <Boards title="レビュー中" :tasks="taskProp"  :position="positions[2]" :filterLength="filterLength" @reorder-tasks="reOrderTask">
                 <template v-slot:modal>
-                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="3" :tasks="tasks"/>
+                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="positions[2]" :tasks="tasks"/>
                 </template>
             </Boards>
-            <Boards title="完了" :tasks="filteredTask.length == 0 ? tasks : filteredTask" :position="4">
+            <Boards title="完了" :tasks="taskProp" :position="positions[3]" :filterLength="filterLength" @reorder-tasks="reOrderTask">
                 <template v-slot:modal>
-                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="4" :tasks="tasks"/>
+                    <Modal value="課題の追加..." :tags="tags" @create-tag="createTag" @create-task="createTask" :position="positions[3]" :tasks="tasks"/>
                 </template>
             </Boards>
         </div>
@@ -33,10 +33,14 @@
             const tags = ref([]);
             const tasks = ref([]);
             const filteredTask = ref([]);
+            const filterLength = 0
+            const positions = [1, 2, 3, 4]
             return{
                 tags,
                 tasks,
-                filteredTask
+                filteredTask,
+                filterLength,
+                positions
             }
         },
 
@@ -58,14 +62,13 @@
                 handler(newTask) {
                     localStorage.setItem('filteredTask', JSON.stringify(newTask))
                 }
-            }
+            },
         },
 
         methods: {
             filterTasks(filters) {
-                // let filteredTask = []
+                this.filterLength = filters.length
                 this.filteredTask = []
-                // console.log(this.filteredTask)
                 let trueCount = []
                 for (let i = 0; i < this.tasks.length; i++) {
                     trueCount[i] = 0
@@ -85,14 +88,6 @@
                         this.filteredTask.push(this.tasks[index])
                     }
                 })
-                
-                // console.log(filteredTask)
-                // return filteredTask
-                // if(filteredTask.length != 0) {
-                //     this.filterTasks = filteredTask
-                // }
-                // console.log(this.filteredTask)
-
             },
 
             createTag(params) {
@@ -102,12 +97,28 @@
             },
 
             createTask(params) {
-                // console.log(params)
                 this.tasks.push({
                     title: params.title,
                     tags: params.tags,
                     position: params.position
                 })
+            },
+
+            reOrderTask(params) {
+                this.tasks = [];
+                params.forEach(task => {
+                    this.tasks.push(task)
+                })
+                // console.log(params[0])
+            }
+        },
+
+        computed: {
+            taskProp() {
+                if(this.filterLength > 0) {
+                    return this.filteredTask
+                }
+                return this.tasks
             }
         },
 
@@ -115,6 +126,7 @@
             this.tasks = JSON.parse(localStorage.getItem('tasks')) || []
             this.tags = JSON.parse(localStorage.getItem('tags')) || []
             this.filteredTask = JSON.parse(localStorage.getItem('filteredTask')) || []
+            this.taskProp
         }
     })
 </script>
